@@ -8,7 +8,7 @@ A tiny command-line program used to test the FirstMate factory end to end. It ha
 python3 -m trial greet Ada
 ```
 
-You will recieve a greeting for the name you give: `Hello, Ada!`. `python3 -m trial greet --help` describes the
+You will receive a greeting for the name you give: `Hello, Ada!`. `python3 -m trial greet --help` describes the
 command.
 
 ## Tests
