@@ -10,6 +10,7 @@ This directory is the maintained source for verifying what a user of trial can s
 
 ## Driving conventions
 
+- `verify.py` in every recipe means `python3 .claude/skills/verify/scripts/verify.py`, run from the repository root.
 - Every drive is `verify.py drive --run <RUN> <label> [assertions] -- <trial args>` (see SKILL.md, Drive).
 - Use the feature's sub-feature ID as the label prefix (`greet-ada`, `help-root`).
 - Copy names, flags and expected text literally.

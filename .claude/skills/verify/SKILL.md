@@ -17,7 +17,7 @@ There is nothing to keep running. Launch records the run: the repository, its HE
 python3 .claude/skills/verify/scripts/verify.py launch --evidence <evidence-dir>
 ```
 
-Ready means it prints `RUN=/tmp/trial-verify.XXXXXXXX`. Pass that path as `--run` to every later step. Pick an evidence directory outside the run directory (launch refuses one inside it); a fresh directory per run keeps proofs apart.
+Ready means it prints `RUN=/tmp/trial-verify.XXXXXXXX`. Pass that path as `--run` to every later step. Pick an evidence directory outside the run directory (Cleanup refuses to delete a run directory that holds it); a fresh directory per run keeps proofs apart.
 
 ## Doctor
 
@@ -32,11 +32,11 @@ It prints one `ok`/`FAIL` line per check and exits 0 only when all pass: the che
 ## Drive
 
 ```bash
-python3 .claude/skills/verify/scripts/verify.py drive --run <RUN> <label> [--exit N] [--stdout TEXT] [--stderr-has TEXT] -- <trial args...>
+python3 .claude/skills/verify/scripts/verify.py drive --run <RUN> <label> [--exit N] [--stdout TEXT] [--stdout-has TEXT]... [--stderr-has TEXT] -- <trial args...>
 ```
 
 - Everything after the first `--` goes to `python3 -m trial` unchanged, so a later `--` reaches trial itself (`-- greet -- --dash`).
-- `--stdout` is the exact expected stdout; write a newline as `\n`. `--stderr-has` is a substring check. `--exit` is the expected exit code.
+- `--stdout` is the exact expected stdout; write a newline as `\n`. `--stdout-has` is a substring check on stdout; repeat it for each key line. `--stderr-has` is a substring check on stderr. `--exit` is the expected exit code.
 - The child runs with `PYTHONDONTWRITEBYTECODE=1` and a 30-second timeout, so a drive leaves no `__pycache__` and no process behind.
 - Exit 0 means every given assertion held; exit 1 means one failed. The transcript says which.
 
@@ -56,4 +56,4 @@ Each drive writes `<evidence-dir>/<label>.txt`: the command and working director
 python3 .claude/skills/verify/scripts/verify.py cleanup --run <RUN>
 ```
 
-It removes only the run directory Launch created and lists the evidence it kept. No drive outlives its own command, so there is no process to stop; never kill by process name. Afterwards, list the evidence directory to confirm the transcripts survived.
+It removes the run directory and lists the evidence it kept. It refuses, deletes nothing and exits non-zero when `--run` is not a `trial-verify.*` directory directly under the system temp directory, or when the recorded evidence directory is inside it. No drive outlives its own command, so there is no process to stop; never kill by process name. Afterwards, list the evidence directory to confirm the transcripts survived.

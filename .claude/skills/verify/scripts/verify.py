@@ -3,7 +3,7 @@
 
   verify.py launch --evidence DIR        create a run directory, print RUN=<path>
   verify.py doctor --run RUN             read-only: is this checkout worth driving?
-  verify.py drive  --run RUN LABEL [--exit N] [--stdout TEXT] [--stderr-has TEXT] -- ARGS...
+  verify.py drive  --run RUN LABEL [--exit N] [--stdout TEXT] [--stdout-has TEXT]... [--stderr-has TEXT] -- ARGS...
                                          run `python3 -m trial ARGS...` from the repo root
   verify.py cleanup --run RUN            remove the run directory, keep the evidence
 """
@@ -43,8 +43,6 @@ def launch(a):
     evidence = os.path.abspath(a.evidence)
     os.makedirs(evidence, exist_ok=True)
     run = tempfile.mkdtemp(prefix="trial-verify.")
-    if os.path.commonpath([run, evidence]) == run:
-        sys.exit("launch: the evidence directory must not be inside the run directory")
     state = {"repo": REPO, "python": python, "python_version": python_version(python),
              "head": git_head(), "evidence": evidence}
     with open(os.path.join(run, "run.json"), "w") as f:
@@ -81,6 +79,9 @@ def drive(a, child):
         failed.append(f"exit {r.returncode} != {a.exit}")
     if a.stdout is not None and r.stdout != a.stdout.replace("\\n", "\n"):
         failed.append(f"stdout {r.stdout!r} != {a.stdout!r}")
+    for text in a.stdout_has or []:
+        if text not in r.stdout:
+            failed.append(f"stdout lacks {text!r}")
     if a.stderr_has is not None and a.stderr_has not in r.stderr:
         failed.append(f"stderr lacks {a.stderr_has!r}")
     verdict = "PASS" if not failed else "FAIL: " + "; ".join(failed)
@@ -95,8 +96,16 @@ def drive(a, child):
 
 
 def cleanup(a):
-    s = load(a.run)
-    shutil.rmtree(a.run)
+    run = os.path.realpath(a.run)
+    if (os.path.dirname(run) != os.path.realpath(tempfile.gettempdir())
+            or not os.path.basename(run).startswith("trial-verify.")):
+        sys.exit(f"cleanup: refusing {a.run}: not a trial-verify.* directory directly under "
+                 f"{tempfile.gettempdir()}; nothing deleted")
+    s = load(run)
+    evidence = os.path.realpath(s["evidence"])
+    if os.path.commonpath([run, evidence]) == run:
+        sys.exit(f"cleanup: refusing {a.run}: it holds the evidence directory {evidence}; nothing deleted")
+    shutil.rmtree(run)
     kept = sorted(os.listdir(s["evidence"]))
     print(f"removed {a.run}; evidence kept in {s['evidence']}: {', '.join(kept) or '(none)'}")
 
@@ -117,6 +126,7 @@ def main():
     d.add_argument("label")
     d.add_argument("--exit", type=int)
     d.add_argument("--stdout")
+    d.add_argument("--stdout-has", action="append")
     d.add_argument("--stderr-has")
     a = p.parse_args(argv)
     if a.cmd == "drive":
