@@ -2,7 +2,7 @@
 import argparse
 import sys
 
-GREET_HELP = "Say hello"
+GREET_HELP = "Print a greeting for NAME"
 
 
 def greeting(name: str) -> str:

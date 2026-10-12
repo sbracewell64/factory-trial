@@ -28,6 +28,14 @@ class GreetTests(unittest.TestCase):
         self.assertEqual(r.returncode, 2)
         self.assertIn("usage:", r.stderr)
 
+    def test_help_describes_greet(self):
+        for args in (["--help"], ["greet", "--help"]):
+            with self.subTest(args=args):
+                r = subprocess.run([sys.executable, "-m", "trial", *args], capture_output=True, text=True)
+                self.assertEqual(r.returncode, 0, r.stderr)
+                self.assertIn("Print a greeting for NAME", r.stdout)
+                self.assertNotIn("Say hello", r.stdout)
+
 
 if __name__ == "__main__":
     unittest.main()
