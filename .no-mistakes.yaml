@@ -1,0 +1,45 @@
+{
+  "disable_project_settings": true,
+  "commands": {
+    "test": "/srv/factory/bin/factory-checks factory-trial test",
+    "lint": "/srv/factory/bin/factory-checks factory-trial lint",
+    "format": ""
+  },
+  "rebase": {
+    "strategy": "merge"
+  },
+  "ci": {
+    "revalidate_repairs": true,
+    "rerun_transient": 1
+  },
+  "protected_paths": [
+    ".claude/**",
+    ".codex/**",
+    ".agents/**",
+    "AGENTS.md",
+    "CLAUDE.md",
+    ".mcp.json",
+    ".github/workflows/**",
+    ".factory/**",
+    ".no-mistakes.yaml",
+    ".no-mistakes/**"
+  ],
+  "auto_fix": {
+    "rebase": 0,
+    "review": 3,
+    "test": 0,
+    "document": 0,
+    "lint": 0,
+    "ci": 3
+  },
+  "test": {
+    "instructions": "Drive scenarios with the repository's .claude/skills/verify skill when it exists."
+  },
+  "gates": [
+    {
+      "name": "red-green",
+      "after": "test",
+      "command": "/srv/factory/bin/factory-red-green factory-trial"
+    }
+  ]
+}
