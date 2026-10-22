@@ -14,13 +14,15 @@ def build_parser() -> argparse.ArgumentParser:
     commands = parser.add_subparsers(dest="command", metavar="command", required=True)
     greet = commands.add_parser("greet", help=GREET_HELP, description=GREET_HELP)
     greet.add_argument("name", help="who to greet")
+    greet.add_argument("--shout", action="store_true", help="print the greeting in capital letters")
     return parser
 
 
 def main(argv=None) -> int:
     args = build_parser().parse_args(argv)
     if args.command == "greet":
-        print(greeting(args.name))
+        text = greeting(args.name)
+        print(text.upper() if args.shout else text)
     return 0
 
 
