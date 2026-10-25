@@ -23,6 +23,6 @@ This directory is the maintained source for verifying what a user of trial can s
 
 ## Features
 
-- [Greet someone](./greet.md) covers `greet NAME`, names with spaces, and names that start with `-`.
+- [Greet someone](./greet.md) covers `greet NAME`, names with spaces, names that start with `-`, and `--shout`.
 - [Help text](./help.md) covers `--help` and `-h` for the program and for `greet`.
 - [Usage errors](./usage-errors.md) covers a missing command, a missing name, an unknown command and extra arguments.
