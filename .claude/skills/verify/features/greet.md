@@ -20,14 +20,15 @@ Preconditions:
 
 - Launch printed `RUN=...` and `verify.py doctor --run <RUN>` exits 0.
 
-- **Plain name.** Run `verify.py drive --run <RUN> greet-ada --exit 0 --stdout 'Hello, Ada!\n' -- greet Ada`. The verdict is `PASS` and stderr is empty.
-- **Name with spaces.** Run `verify.py drive --run <RUN> greet-spaces --exit 0 --stdout 'Hello, Ada Lovelace!\n' -- greet 'Ada Lovelace'`. The whole quoted name appears in one greeting.
-- **Name that starts with a dash.** Run `verify.py drive --run <RUN> greet-dash --exit 0 --stdout 'Hello, --dash!\n' -- greet -- --dash`. trial treats `--dash` as the name, not an option.
-- **Shout after the name.** Run `verify.py drive --run <RUN> greet-shout --exit 0 --stdout 'HELLO, ADA!\n' -- greet Ada --shout`. The whole greeting is in capitals and stderr is empty.
-- **Shout before the name.** Run `verify.py drive --run <RUN> greet-shout-first --exit 0 --stdout 'HELLO, ADA LOVELACE!\n' -- greet --shout 'Ada Lovelace'`. The flag position does not matter.
+- **Plain name.** Run `verify.py drive --run <RUN> greet-name --exit 0 --stdout 'Hello, Ada!\n' --stderr '' -- greet Ada`. The verdict is `PASS` and stderr is empty.
+- **Name with spaces.** Run `verify.py drive --run <RUN> greet-spaces --exit 0 --stdout 'Hello, Ada Lovelace!\n' --stderr '' -- greet 'Ada Lovelace'`. The whole quoted name appears in one greeting.
+- **Name that starts with a dash.** Run `verify.py drive --run <RUN> greet-dash --exit 0 --stdout 'Hello, --dash!\n' --stderr '' -- greet -- --dash`. trial treats `--dash` as the name, not an option.
+- **Shout after the name.** Run `verify.py drive --run <RUN> greet-shout --exit 0 --stdout 'HELLO, ADA!\n' --stderr '' -- greet Ada --shout`. The whole greeting is in capitals and stderr is empty.
+- **Shout before the name.** Run `verify.py drive --run <RUN> greet-shout-first --exit 0 --stdout 'HELLO, ADA LOVELACE!\n' --stderr '' -- greet --shout 'Ada Lovelace'`. The flag position does not matter.
 
 ## Gotchas
 
 - `greet Ada Lovelace` without quotes is a usage error (`unrecognized arguments: Lovelace`), not a greeting; see usage-errors.md.
 - `greet --dash` without the inner `--` is a usage error; only `greet -- --dash` greets.
 - The greeting ends with one newline. Assert stdout exactly, newline included.
+- A greeting writes nothing to stderr. `--stderr ''` is what proves that; leave it in.
