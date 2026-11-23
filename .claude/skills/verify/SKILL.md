@@ -32,22 +32,22 @@ It prints one `ok`/`FAIL` line per check and exits 0 only when all pass: the che
 ## Drive
 
 ```bash
-python3 .claude/skills/verify/scripts/verify.py drive --run <RUN> <label> [--exit N] [--stdout TEXT] [--stdout-has TEXT]... [--stderr-has TEXT] -- <trial args...>
+python3 .claude/skills/verify/scripts/verify.py drive --run <RUN> <label> [--exit N] [--stdout TEXT] [--stdout-has TEXT]... [--stderr TEXT] [--stderr-has TEXT]... -- <trial args...>
 ```
 
 - Everything after the first `--` goes to `python3 -m trial` unchanged, so a later `--` reaches trial itself (`-- greet -- --dash`).
-- `--stdout` is the exact expected stdout; write a newline as `\n`. `--stdout-has` is a substring check on stdout; repeat it for each key line. `--stderr-has` is a substring check on stderr. `--exit` is the expected exit code.
+- `--stdout` and `--stderr` are the exact expected stdout and stderr; write a newline as `\n`, and pass `''` to require an empty stream. `--stdout-has` and `--stderr-has` are substring checks on stdout and stderr; repeat a flag for each key line, and the drive fails when any value is missing. `--exit` is the expected exit code.
 - The child runs with `PYTHONDONTWRITEBYTECODE=1` and a 30-second timeout, so a drive leaves no `__pycache__` and no process behind.
 - Exit 0 means every given assertion held; exit 1 means one failed. The transcript says which.
 
-Example: `... drive --run <RUN> greet-ada --exit 0 --stdout 'Hello, Ada!\n' -- greet Ada`. The recipes per feature are in `features/`.
+Example: `... drive --run <RUN> greet-name --exit 0 --stdout 'Hello, Ada!\n' --stderr '' -- greet Ada`. The recipes per feature are in `features/`.
 
 ## Evidence
 
 Each drive writes `<evidence-dir>/<label>.txt`: the command and working directory, HEAD, Python version, exit code, stdout, stderr and the verdict. That transcript is the proof: it holds the user action and the resulting state.
 
 - Drive the real entry point (`python3 -m trial ...`), never `trial.__main__.main()` or `greeting()` directly; the unit tests already do that.
-- Assert both streams: a usage error must leave stdout empty and put `usage:` on stderr.
+- Assert both streams: a greeting must leave stderr empty (`--stderr ''`); a usage error must leave stdout empty (`--stdout ''`) and put its usage line and its `error:` line on stderr (one `--stderr-has` each).
 - trial writes no files. After a drive, `git status --short` should show no new paths from the drive; save its output next to the transcripts when a change could add side effects.
 
 ## Cleanup

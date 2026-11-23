@@ -3,7 +3,7 @@
 
   verify.py launch --evidence DIR        create a run directory, print RUN=<path>
   verify.py doctor --run RUN             read-only: is this checkout worth driving?
-  verify.py drive  --run RUN LABEL [--exit N] [--stdout TEXT] [--stdout-has TEXT]... [--stderr-has TEXT] -- ARGS...
+  verify.py drive  --run RUN LABEL [--exit N] [--stdout TEXT] [--stdout-has TEXT]... [--stderr TEXT] [--stderr-has TEXT]... -- ARGS...
                                          run `python3 -m trial ARGS...` from the repo root
   verify.py cleanup --run RUN            remove the run directory, keep the evidence
 """
@@ -82,8 +82,11 @@ def drive(a, child):
     for text in a.stdout_has or []:
         if text not in r.stdout:
             failed.append(f"stdout lacks {text!r}")
-    if a.stderr_has is not None and a.stderr_has not in r.stderr:
-        failed.append(f"stderr lacks {a.stderr_has!r}")
+    if a.stderr is not None and r.stderr != a.stderr.replace("\\n", "\n"):
+        failed.append(f"stderr {r.stderr!r} != {a.stderr!r}")
+    for text in a.stderr_has or []:
+        if text not in r.stderr:
+            failed.append(f"stderr lacks {text!r}")
     verdict = "PASS" if not failed else "FAIL: " + "; ".join(failed)
     transcript = (f"$ cd {s['repo']} && python3 -m trial {shlex.join(child)}\n"
                   f"head: {s['head']}\n{s['python_version']}\nexit: {r.returncode}\n"
@@ -127,7 +130,8 @@ def main():
     d.add_argument("--exit", type=int)
     d.add_argument("--stdout")
     d.add_argument("--stdout-has", action="append")
-    d.add_argument("--stderr-has")
+    d.add_argument("--stderr")
+    d.add_argument("--stderr-has", action="append")
     a = p.parse_args(argv)
     if a.cmd == "drive":
         drive(a, child)
